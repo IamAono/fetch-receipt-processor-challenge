@@ -22,13 +22,13 @@ func main() {
 
 		// bind the JSON payload with receipt
 		if err := c.ShouldBindJSON(&receipt); err != nil {
+			log.Println(err)
 			c.JSON(400, gin.H{"error": "Invalid JSON"})
 			return
 		}
 
 		// calculate the amount of points that were earned from the recipt and save the value in a map
 		points[id] = receipt.calcPoints()
-		log.Println("Total points:", points[id])
 
 		c.JSON(http.StatusOK, gin.H{"id": id})
 		id++
@@ -36,6 +36,7 @@ func main() {
 	router.GET("/receipts/:id/points", func(c *gin.Context) {
 		idReq, err := strconv.Atoi(c.Params.ByName("id"))
 		if err != nil {
+			log.Println(err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid id"})
 			return
 		}
@@ -43,6 +44,7 @@ func main() {
 		_, ok := points[idReq]
 		if !ok {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid id"})
+			return
 		}
 		c.JSON(http.StatusOK, gin.H{"points": points[idReq]})
 
