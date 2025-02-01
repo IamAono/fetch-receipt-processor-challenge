@@ -10,8 +10,9 @@ import (
 )
 
 func main() {
+	// id for the receipts
 	id := 1
-	// a map where the key is the id and the value is the amount of points earned
+	// a map where the key is the receipt id and the value is the amount of points earned
 	points := make(map[int]int)
 	router := gin.Default()
 	router.Use(cors.Default())
@@ -33,7 +34,9 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"id": id})
 		id++
 	})
+	// A simple Getter endpoint that looks up the receipt by the ID and returns an object specifying the points awarded.
 	router.GET("/receipts/:id/points", func(c *gin.Context) {
+		// retrieve the request parameter id and convert it to an int
 		idReq, err := strconv.Atoi(c.Params.ByName("id"))
 		if err != nil {
 			log.Println(err)
@@ -47,7 +50,6 @@ func main() {
 			return
 		}
 		c.JSON(http.StatusOK, gin.H{"points": points[idReq]})
-
 	})
 
 	// Start the webservice
