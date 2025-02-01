@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"math"
 	"strconv"
@@ -22,7 +23,7 @@ type Receipt struct {
 }
 
 // calculate the amount of points earned
-func (receipt Receipt) calcPoints() int {
+func (receipt Receipt) calcPoints() (int, error) {
 	points := 0
 	// One point for every alphanumeric character in the retailer name.
 	for _, val := range receipt.Retailer {
@@ -32,10 +33,13 @@ func (receipt Receipt) calcPoints() int {
 	}
 	// 50 points if the total is a round dollar amount with no cents.
 	totalSplit := strings.Split(receipt.Total, ".")
+	if len(totalSplit) != 2 {
+		return points, fmt.Errorf("invalid total")
+	}
 	cents, err := strconv.Atoi(totalSplit[1])
 	if err != nil {
 		log.Println(err)
-		return points
+		return points, err
 	}
 	if cents == 0 {
 		points += 50
@@ -53,30 +57,36 @@ func (receipt Receipt) calcPoints() int {
 			price, err := strconv.ParseFloat(item.Price, 64)
 			if err != nil {
 				log.Println(err)
-				return points
+				return points, err
 			}
 			points += int(math.Ceil(price * float64(0.2)))
 		}
 	}
 	// 6 points if the day in the purchase date is odd.
 	dateSplit := strings.Split(receipt.PurchaseDate, "-")
+	if len(dateSplit) != 3 {
+		return points, fmt.Errorf("invalid purchase date")
+	}
 	dayOfMonth, err := strconv.Atoi(dateSplit[2])
 	if err != nil {
 		log.Println(err)
-		return points
+		return points, err
 	}
 	if dayOfMonth%2 == 1 {
 		points += 6
 	}
 	// 10 points if the time of purchase is after 2:00pm and before 4:00pm.
 	timeSplit := strings.Split(receipt.PurchaseTime, ":")
+	if len(timeSplit) != 2 {
+		return points, fmt.Errorf("invalid purchase time")
+	}
 	time, err := strconv.Atoi(timeSplit[0] + timeSplit[1])
 	if err != nil {
 		log.Println(err)
-		return points
+		return points, err
 	}
 	if time >= 1400 && time < 1600 {
 		points += 10
 	}
-	return points
+	return points, nil
 }

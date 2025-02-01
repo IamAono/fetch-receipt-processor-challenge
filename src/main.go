@@ -28,9 +28,15 @@ func main() {
 			return
 		}
 
-		// calculate the amount of points that were earned from the recipt and save the value in a map
-		points[id] = receipt.calcPoints()
+		// calculate the amount of points that were earned from the recipt
+		pts, err := receipt.calcPoints()
+		if err != nil {
+			c.JSON(400, gin.H{"error": err.Error()})
+			return
+		}
 
+		// save the id and points pair to the map
+		points[id] = pts
 		c.JSON(http.StatusOK, gin.H{"id": id})
 		id++
 	})
